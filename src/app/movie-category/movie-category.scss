@@ -1,0 +1,38 @@
+.app-container{
+  display: flex;
+  height: 100vh;
+
+  @media (max-width: 393px) {
+    flex-direction: column-reverse;
+  }
+}
+
+.nav-panel{
+  flex: 0 0 15%;
+  height: 100%;
+
+  border-right: 0.5px solid rgba(204, 204, 204, 0.2);
+
+  background: #f7f7f7;
+
+  @media (max-width: 393px) {
+    flex: none;
+    width: 100%;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #121212;
+  }
+}
+
+.main-tab {
+  flex: 1;
+  height: 100%;
+  background-color: rgb(22, 24, 34);
+  padding: 24px;
+  overflow: auto;
+
+}
