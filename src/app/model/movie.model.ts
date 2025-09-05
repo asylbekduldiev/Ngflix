@@ -5,7 +5,7 @@ export interface Movie{
   genres: string[];
   href: string;
   extract: string;
-  thumbnail:string;
+  thumbnail: string;
   thumbnail_width: number;
   thumbnail_height: number;
   id: number;

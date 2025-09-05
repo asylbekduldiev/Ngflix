@@ -9,3 +9,11 @@
   justify-content: space-between;
   align-items: center;
 }
+
+.movies{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 30px;
+  padding: 16px;
+  margin-top: 100px;
+}

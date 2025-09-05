@@ -1,24 +1,14 @@
-@if (movies$) {
-  @for (movie of movies$ | async; track movie.id) {
-    <div class="card">
-
-
-    </div>
-    <div>
-      <img [ngSrc]="movie.thumbnail"
-           alt="{{ movie.title }}"
-           width="150"
-           height="225">
-    </div>
-    <div>
-      {{ movie.title }}
-    </div>
-    <div>
-      {{ movie.year }}, {{ movie.genres.at(0) }}
-    </div>
-  }
-} @else {
-
-}
-
-
+<div class="card">
+  <span>
+    <button></button>
+  </span>
+  <img
+    class="poster"
+    [ngSrc]="movie()?.thumbnail!"
+    alt="{{ movie()?.title }}"
+    width="150"
+    height="225"
+  >
+  <div>{{ movie()?.title }}</div>
+  <div>{{ movie()?.year }}, {{ movie()!.genres.at(0) }}</div>
+</div>
