@@ -1,0 +1,42 @@
+.movie-detail {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  background: var(--p-menubar-background); // фон
+  color: #f1f1f1; // текст
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.poster img {
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.info {
+  flex: 1;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+
+  .year {
+    font-size: 1.2rem;
+    color: #aaa;
+    font-weight: normal;
+  }
+}
+
+.about {
+  font-size: 1rem;
+  line-height: 1.6;
+
+  p {
+    margin: 0.5rem 0;
+  }
+
+  strong {
+    color: #ff9800; // акцент
+  }
+}

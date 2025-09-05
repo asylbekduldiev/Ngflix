@@ -1,0 +1,24 @@
+@if (movie$ | async; as movie) {
+  <div class="movie-detail">
+    <div class="poster">
+      <img
+        [ngSrc]="movie.thumbnail"
+        alt="{{ movie.title }}"
+        width="300"
+        height="450"
+      />
+    </div>
+
+    <div class="info">
+      <h1 class="title">
+        {{ movie.title }} <span class="year">({{ movie.year }})</span>
+      </h1>
+
+      <div class="about">
+        <p><strong>Genres:</strong> {{ movie.genres.join(', ') }}</p>
+        <p><strong>Cast:</strong> {{ movie.cast.join(', ') }}</p>
+        <p><strong>Extract:</strong> {{ movie.extract }}</p>
+      </div>
+    </div>
+  </div>
+}
