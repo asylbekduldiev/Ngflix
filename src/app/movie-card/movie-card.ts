@@ -12,4 +12,9 @@ import { NgOptimizedImage} from '@angular/common';
 })
 export class MovieCard {
   movie = input<Movie>()
+
+  get firstGenre(): string | null {
+    const m = this.movie();
+    return m?.genres?.[0] ?? null;
+  }
 }

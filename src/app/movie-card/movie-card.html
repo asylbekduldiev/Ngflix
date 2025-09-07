@@ -1,11 +1,15 @@
 <div class="card">
-  <img
-    class="poster"
-    [ngSrc]="movie()?.thumbnail!"
-    alt="{{ movie()?.title }}"
-    width="150"
-    height="225"
-  >
-  <div>{{ movie()?.title }}</div>
-  <div>{{ movie()?.year }}, {{ movie()!.genres.at(0) }}</div>
+  @if(movie()) {
+    <img
+      class="poster"
+      [ngSrc]="movie()?.thumbnail ?? ''"
+      alt="{{ movie()?.title ?? 'Unknown Movie' }}"
+      width="150"
+      height="225"
+    >
+    <div class="title">{{ movie()?.title ?? 'Unknown Movie' }}</div>
+    <div class="details">
+      {{ movie()?.year ?? 'N/A' }}@if(firstGenre) {, {{ firstGenre }} }
+    </div>
+  }
 </div>

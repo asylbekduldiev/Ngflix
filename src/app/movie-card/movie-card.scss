@@ -1,12 +1,43 @@
-.card{
+.card {
   width: 152px;
-  border: 1px solid;
   border-radius: 10px;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
 }
 
-.poster{
+.poster {
   width: 150px;
   height: 225px;
   border-radius: 10px;
+  object-fit: cover;
+}
+
+.title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #ffffff;
+  margin-top: 8px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.details {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #ffffff;
+  margin-top: 2px;
+  text-align: center;
 }
