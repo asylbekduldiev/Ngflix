@@ -1,6 +1,6 @@
-import {Component, inject, input, signal} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {Movie} from '../model/movie.model';
-import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import { NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-movie-card',

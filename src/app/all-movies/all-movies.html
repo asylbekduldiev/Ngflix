@@ -4,12 +4,14 @@
   <div>
     <p-floatlabel variant="on">
       <p-autocomplete
-        [(ngModel)]="value"
+        [formControl]="searchControl"
         [suggestions]="(items$ | async) ?? []"
         field="title"
         optionLabel="title"
-        (completeMethod)="search($event)"
         (onSelect)="goToMovie($event)">
+        <ng-template let-movie pTemplate="item">
+          <div>{{ movie.title }} ({{ movie.year }})</div>
+        </ng-template>
       </p-autocomplete>
       <label for="on_label">Search</label>
     </p-floatlabel>
