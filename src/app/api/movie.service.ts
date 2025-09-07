@@ -17,7 +17,7 @@ export class MovieService{
   }
 
   searchMovies(query: string) {
-    return this.http.get<Movie[]>(`${this.api}?title_like=${query}`);
+    const q = encodeURIComponent(query.trim());
+    return this.http.get<Movie[]>(`${this.api}?title_like=${q}`);
   }
-
 }

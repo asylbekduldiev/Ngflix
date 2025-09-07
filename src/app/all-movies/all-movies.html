@@ -7,10 +7,9 @@
         [(ngModel)]="value"
         [suggestions]="(items$ | async) ?? []"
         field="title"
+        optionLabel="title"
         (completeMethod)="search($event)"
-        (onSelect)="goToMovie($event)"
-        [delay]="300"
-        inputId="on_label">
+        (onSelect)="goToMovie($event)">
       </p-autocomplete>
       <label for="on_label">Search</label>
     </p-floatlabel>
