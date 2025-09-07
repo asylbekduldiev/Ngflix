@@ -1,13 +1,17 @@
 <div class="head-bar">
-
   <div>All Movies</div>
 
   <div>
     <p-floatlabel variant="on">
-      <p-autocomplete [(ngModel)]="value"
-                      [suggestions]="items"
-                      (completeMethod)="search($event)"
-                      inputId="on_label"></p-autocomplete>
+      <p-autocomplete
+        [(ngModel)]="value"
+        [suggestions]="(items$ | async) ?? []"
+        field="title"
+        (completeMethod)="search($event)"
+        (onSelect)="goToMovie($event)"
+        [delay]="300"
+        inputId="on_label">
+      </p-autocomplete>
       <label for="on_label">Search</label>
     </p-floatlabel>
   </div>

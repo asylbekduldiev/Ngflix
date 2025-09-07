@@ -16,7 +16,7 @@ export class MovieService{
     return  this.http.get<Movie>(`${this.api}/${id}`)
   }
 
-  searchMovies(query: string): Observable<Movie[]> {
+  searchMovies(query: string) {
     return this.http.get<Movie[]>(`${this.api}?title_like=${query}`);
   }
 
