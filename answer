@@ -1,0 +1,163 @@
+1) Event propagation (распространение событий) — что это и зачем
+
+Простая картинка: событие создаётся на целевом элементе и «идёт по дереву» DOM: сначала — сверху вниз (capture), потом — на цели (target), затем — снизу вверх (bubble).
+Спецификация (HTML/DOM) описывает алгоритм: браузер строит путь (event path) от цели до window, затем вызывает обработчики в порядке capture→target→bubble.
+
+Фазы
+  1. Capturing (перехват) — слушатели с { capture: true } выполняются по пути от window → document → … → target.
+	2. Target — обработчики на самом целевом элементе.
+	3. Bubbling (всплытие) — слушатели без capture выполняются от target → вверх к window.
+
+event.eventPhase показывает текущую фазу (1=Capturing, 2=At target, 3=Bubbling). event.composedPath() возвращает полный путь (включая Shadow DOM).
+
+Ключевые приемы на практике
+	Event delegation — вешаете один обработчик на родителя и проверяете event.target/closest() → экономия памяти, удобство при динамических элементах.
+
+parent.addEventListener('click', e => {
+  const btn = e.target.closest('.item-btn');
+  if (btn) handle(btn.dataset.id);
+});
+
+Interception — ловите события в capture-фазе, если нужно «предотвратить» их до обработки дочерними элементами.
+Остановка распространения:
+event.stopPropagation() — дальше по дереву не идёт;
+event.stopImmediatePropagation() — ещё и другие слушатели на том же элементе не выполнятся.
+Passive listeners ({ passive: true }) для скролла/touch — дают браузеру оптимизацию прокрутки (нельзя вызывать preventDefault()).
+Shadow DOM / composed — события по умолчанию не выходят из shadow; если нужно, событие создаётся с composed: true.
+
+Почему важно (практический смысл)
+Контроль очередности выполнения, оптимизация (делегирование), безопасность/изоляция компонентов (Shadow DOM), корректная обработка пользовательского ввода и производительность (passive, минимизация обработчиков).
+
+
+2) Promise и Event Loop — как это устроено в спецификации и на практике
+
+Что такое Promise (по сути)
+Promise — объект, представляющий асинхронный результат. В спецификации ECMAScript описан механизм перехода состояния и «Promise Job» (микрозадачи) для вызова реакций .then/.catch.
+
+Состояния
+  pending — ожидание,
+  fulfilled — успешно завершён (value),
+  rejected — отклонён (reason).
+После перехода состояние не меняется.
+
+Как работает (ключевые факты)
+  При new Promise(executor) функция executor выполняется синхронно; она получает resolve и reject.
+  Когда вызывается resolve(value) или reject(err), зарегистрированные обработчики (then, catch) помещаются в микрозадачи (microtask queue) и будут выполнены после текущего стека вызовов, но до следующей макрозадачи (setTimeout, события, I/O).
+  then возвращает новый Promise; если then возвращает «thenable», запускается процедура разрешения thenable (Promise Resolution Procedure) — это помогает комбинировать разные реализации.
+
+Пример:
+console.log('sync');
+Promise.resolve().then(()=> console.log('microtask'));
+setTimeout(()=> console.log('macrotask'), 0);
+Вывод: sync → microtask → macrotask.
+
+Альтернативы Promise
+  Callbacks — функция-обратный вызов (старый стиль).
+  async/await — синтаксический сахар поверх Promise.
+  Observables (RxJS) — стримы, могут эмитировать много значений, удобны для событийных потоков и отмены.
+  Generators + runner (co) — менее популярно сейчас.
+  Web Workers — выполнение в другом потоке (не заменяет Promise, но убирает тяжёлые блоки с основного потока).
+
+Роль Event Loop
+  JS-движок выполняет стек вызовов (call stack).
+  После пустого стека выполняются микрозадачи (Promise reactions).
+  Затем браузер может выполнить отрисовку (render) и одну макрозадачу (tasks: timers, I/O, user events).
+  Этот порядок даёт гарантию: then всегда предшествует setTimeout(...,0) и позволяет детерминированно управлять асинхронностью.
+
+
+3) ООП и как оно реализовано в JavaScript (самое важное)
+
+Классические принципы ООП
+	1. Инкапсуляция — объединение данных и поведения, скрытие реализации.
+	2. Абстракция — выделение важного, скрытие деталей.
+	3. Наследование — повторное использование кода из родителя.
+	4. Полиморфизм — разные объекты отвечают на одни и те же сообщения по-разному.
+
+Как это в JavaScript (важно знать отличия)
+  JS — прототипно-ориентирован: объекты наследуют свойства через прототипную цепочку ([[Prototype]] / Object.getPrototypeOf).
+  Синтаксис class — это сахар над прототипами; под капотом создаются функции-конструкторы и методы на прототипе.
+  new выполняет: создаёт объект, ставит [[Prototype]] на Constructor.prototype, вызывает функцию-конструктор с this, если конструктор вернул объект — он возвращается, иначе новый объект.
+  this привязан к способу вызова (динамический): obj.method() → this = obj, fn() → this = undefined в strict или window в non-strict; bind фиксирует this.
+	Инкапсуляция:
+	  приватные поля: #private (спецификация ES-Next) — реальные приватные поля, видимы только в классах;
+	  замыкания (closure) — ещё способ скрыть данные;
+	  property descriptors: writable, enumerable, configurable.
+	  Прототипная делегaция:
+
+function Person(name){ this.name = name; }
+Person.prototype.greet = function(){ return `Hi ${this.name}`; };
+const p = new Person('A');
+
+class Person {
+  #secret;
+  constructor(name){ this.name = name; this.#secret = 42; }
+  greet(){ return `Hi ${this.name}`; }
+}
+
+Полиморфизм через переопределение методов и интерфейсную договорённость (duck typing).
+Composition over inheritance — часто рекомендуемый паттерн: собирать поведение через функции/миксины, а не глубокое наследование.
+
+Ключевые ловушки/факты
+  Методы класса находятся в прототипе (не копируются в каждый экземпляр).
+  instanceof проверяет прототипную цепочку.
+  Private fields (#f) не доступны извне и не появляются в объекте как обычное свойство.
+  Для полного понимания — почитать: «What the heck is [[Prototype]]?» и спецификацию OrdinaryGet и GetPrototypeOf.
+
+
+4) От ввода URL до отрисовки страницы — детально и по делу
+
+Я расписал этапы как конвейер: от ввода до пикселей на экране. Каждая строчка — ключевая чек-точка.
+	1. Пользователь вводит URL / кликает ссылку
+	  Браузер нормализует URL (scheme://host:port/path?query#hash).
+	  Если #hash и страница SPA поддерживает — может обработать на месте (без сетевого запроса).
+	2. Service worker / App cache / Browser cache
+	  Service Worker может перехватить fetch и вернуть ответ из кэша.
+	  HTTP cache (memory/disk) и DNS cache проверяются до сетевых запросов.
+	3. DNS разрешение
+	  Имя домена переводится в IP (DNS), с возможным использованием DoH/DoT или кеша.
+	4. Установка соединения
+	  TCP handshake или QUIC (HTTP/3).
+	  TLS handshake (сертификат, SNI); возможна сессия resumption.
+	5. HTTP запрос
+	  Браузер отправляет HTTP(S) запрос с заголовками (Host, Cookies, Accept, Origin и т.д.).
+	  CORS preflight (OPTIONS) — если запрос «не-прост» и кросс-доменный.
+	  Сервер отвечает: 200/3xx/4xx/5xx; может задать заголовки кеширования, CSP, CORS, Set-Cookie.
+	6. Redirects
+	  3xx → браузер повторно делает новый запрос по Location.
+	7. Парсинг HTML и загрузка ресурсов
+	  HTML парсится последовательно → строится DOM.
+	  Встреча <link rel="stylesheet"> запускает загрузку CSS → строится CSSOM; CSS блокирует рендер.
+	  Встреча <script>:
+	  без defer/async — блокирует парсинг до загрузки и выполнения.
+	  defer — загружается параллельно, выполняется после парсинга DOM.
+	  async — выполняется как только загружен, порядок не гарантирован.
+	  Ресурсы (картинки, шрифты) загружаются параллельно; отсутствие размеров может вызвать перерасчёт layout.
+	8. Построение Render Tree → Layout (reflow) → Paint → Composite
+	  DOM + CSSOM → Render Tree.
+	  Layout = вычисление геометрии.
+	  Paint = рисование слоёв.
+	  Composite = объединение слоёв → вывод на экран.
+	9. JS может менять DOM в любой момент → возможны дополнительные reflow/paint.
+
+Технологии ускорения
+	  CDN — уменьшает RTT.
+	  HTTP/2, HTTP/3 (QUIC) — мультиплексирование, меньше RTT.
+	  Cache headers (Cache-Control, ETag, Last-Modified) — избегать лишних загрузок.
+	  Service Workers — кастомное кэширование/проксирование.
+	  Preconnect / dns-prefetch / preload / prefetch — сокращают задержки.
+	  Critical CSS / inline critical — убрать блокирующий рендер CSS.
+	  Lazy loading (loading="lazy") для картинок, dynamic import для JS.
+	  Compression (brotli/gzip), оптимизированные изображения (AVIF/WebP), font strategies (font-display).
+	  SSR / Edge rendering / CDN caching — снижает TTFB и первый meaningful paint.
+
+Безопасность и междоменные проблемы
+	  Same Origin Policy (SOP) — ограничивает доступ скриптов к ресурсам другого происхождения.
+	  CORS — сервер должен явно разрешать кросс-запросы (Access-Control-Allow-Origin); preflight для небезопасных запросов.
+	  XSS — пользовательская/внешняя HTML уязвима; защита: CSP, экранирование, Trusted Types.
+	  CSRF — защита: SameSite cookies, CSRF tokens.
+	  Mixed content — загрузка http ресурсов на https странице блокируется.
+	  Certificate/TLS issues — просроченные/неверные сертификаты блокируют загрузку.
+	  SRI (Subresource Integrity) — контроль внешних скриптов/стилей на клиенте.
+	  Cookie security — Secure, HttpOnly, SameSite флаги.
+	  Content Security Policy (CSP) — ограничивает, откуда можно загружать и выполнять ресурсы.
+	  postMessage — безопасный способ общения между окнами/iframe (обязательно проверять origin).
